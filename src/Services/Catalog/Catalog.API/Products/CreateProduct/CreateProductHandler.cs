@@ -1,7 +1,4 @@
-﻿using BuildingBlocks.CQRS;
-using Catalog.API.Models;
-
-namespace Catalog.API.Products.CreateProduct;
+﻿namespace Catalog.API.Products.CreateProduct;
 
 public record CreateProductCommand(
     string Name,
@@ -10,10 +7,25 @@ public record CreateProductCommand(
     string ImageFile,
     decimal Price): ICommand<CreateProductResult>;
 
+
+// Validation class
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required.");
+        RuleFor(x => x.Category).NotEmpty().WithMessage("Category is required.");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Description is required.");
+        RuleFor(x => x.ImageFile).NotEmpty().WithMessage("ImageFile is required.");
+        RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
+    }
+}
+
 public record CreateProductResult(Guid Id);
 
 // Application Login Layer
-internal class CreateProductCommandHandler(IDocumentSession session)
+internal class CreateProductCommandHandler
+    (IDocumentSession session, ILogger<CreateProductCommandHandler> logger)
     : ICommandHandler<CreateProductCommand, CreateProductResult>
 {
     public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
@@ -21,6 +33,10 @@ internal class CreateProductCommandHandler(IDocumentSession session)
         // Business logic to create a product.
         // save to database
         // return CreateProductResult result
+        logger.LogInformation("CreateProductCommandHandler.Handle called with: {@Command}", command);
+
+
+
         var product = new Product
         {
             Name = command.Name,
