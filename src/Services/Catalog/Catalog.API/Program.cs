@@ -18,6 +18,12 @@ builder.Services.AddMarten(options =>
     options.Connection(builder.Configuration.GetConnectionString("Database")!);
 }).UseLightweightSessions(); // Add Marten
 
+if (builder.Environment.IsDevelopment())
+{
+    // Enable Marten's schema generation in development mode
+    builder.Services.InitializeMartenWith<CatalogInitialData>();
+}
+
 // Add custom exception handler
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
