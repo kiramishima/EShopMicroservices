@@ -3,15 +3,6 @@ version: '3.8'
 services:
     catalogdb:
         image: postgres
-        restart: always
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: CatalogDb
-        ports:
-            - "5432:5432"
-        volumes:
-            - postgres_catalog:/var/lib/postgresql/data
     catalog.api:
         image: ${DOCKER_REGISTRY-}catalogapi
         build:

@@ -27,6 +27,10 @@ if (builder.Environment.IsDevelopment())
 // Add custom exception handler
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,5 +43,11 @@ app.UseExceptionHandler(options =>
 {
 
 });
+// Revisar en github: AspNetCore.Diagnostics.HealthChecks
+app.UseHealthChecks("/health",
+    new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
 
 app.Run();
