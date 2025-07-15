@@ -2,8 +2,8 @@
 {
     public class ShoppingCart
     {
-        public string UserName { get; set; } = default!;
-        public List<ShoppingCartItem> Items { get; set; } = new();
+        public string UserName { get; set; } = null!;
+        public List<ShoppingCartItem> Items { get; set; } = [];
         public decimal TotalPrice => Items.Sum(x => x.Price * x.Quantity);
         // Required for Mapping
         public ShoppingCart() { }
