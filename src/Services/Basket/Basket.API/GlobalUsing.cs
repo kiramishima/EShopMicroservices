@@ -10,3 +10,5 @@ global using Mapster;
 global using Marten;
 global using MediatR;
 global using BuildingBlocks.Exceptions.Handler;
+global using Microsoft.Extensions.Caching.Distributed;
+global using System.Text.Json;

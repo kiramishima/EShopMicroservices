@@ -1,3 +1,6 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,13 +23,39 @@ builder.Services.AddMarten(opts =>
 }).UseLightweightSessions();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>(); // Inject the repository
+// Decorando manualmente, pero no es tanm escalable como usar un contenedor IoC
+//builder.Services.AddScoped<IBasketRepository>(provider =>
+//{
+//    var basketRepository = provider.GetRequiredService<BasketRepository>();
+//    return new CachedBasketRepository(basketRepository, provider.GetRequiredService<IDistributedCache>());
+//});
+// usamos Scrutor para decorar automáticamente
+builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
+// Registramos IDistributedCache para Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis")!;
+    // options.InstanceName = "Basket";
+});
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>(); // Register the custom exception handler
+
+// Health checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("Database")!)
+    .AddRedis(builder.Configuration.GetConnectionString("Redis")!);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapCarter();
 app.UseExceptionHandler(opts => {});
+
+// Health checks endpoint
+app.UseHealthChecks("/health", 
+    new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
 
 app.Run();
