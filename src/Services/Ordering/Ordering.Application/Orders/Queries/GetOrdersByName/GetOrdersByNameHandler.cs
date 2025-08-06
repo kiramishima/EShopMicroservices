@@ -16,54 +16,8 @@ namespace Ordering.Application.Orders.Queries.GetOrdersByName
                 .OrderBy(o => o.OrderName)
                 .ToListAsync(cancellationToken);
 
-            // var orderDtos = ProjectToOrderDto(orders); // Antes de usar la extensión
             var orderDtos = orders.ToOrderDtoList();
             return new GetOrdersByNameQueryResult(orderDtos);
-        }
-
-        private List<OrderDto> ProjectToOrderDto(List<Order> orders)
-        {
-            List<OrderDto> result = new();
-            foreach (var order in orders)
-            {
-                var orderDto = new OrderDto(
-                    Id: order.Id.Value,
-                    CustomerId: order.CustomerId.Value,
-                    OrderName: order.OrderName.Value,
-                    ShippingAddress: new AddressDto(
-                        order.ShippingAddress.FirstName,
-                        order.ShippingAddress.LastName,
-                        order.ShippingAddress.EmailAddress,
-                        order.ShippingAddress.AddressLine,
-                        order.ShippingAddress.State,
-                        order.ShippingAddress.ZipCode,
-                        order.ShippingAddress.Country),
-                    BillingAddress: new AddressDto(
-                        order.BillingAddress.FirstName,
-                        order.BillingAddress.LastName,
-                        order.BillingAddress.EmailAddress,
-                        order.BillingAddress.AddressLine,
-                        order.BillingAddress.State,
-                        order.BillingAddress.ZipCode,
-                        order.BillingAddress.Country),
-                    Payment: new PaymentDto(
-                        order.Payment.CardName,
-                        order.Payment.CardNumber,
-                        order.Payment.Expiration,
-                        order.Payment.CVV,
-                        order.Payment.PaymentMethod),
-                    Status: order.Status,
-                    OrderItems: order.OrderItems.Select(oi => new OrderItemDto(
-                        OrderId: oi.OrderId.Value,
-                        ProductId: oi.ProductId.Value,
-                        Quantity: oi.Quantity,
-                        Price: oi.Price)).ToList()
-                );
-
-                result.Add(orderDto);
-            }
-
-            return result;
         }
 
         public Task<GetOrdersByNameQueryResult> Handle(GetOrdersByNameQuery query)
